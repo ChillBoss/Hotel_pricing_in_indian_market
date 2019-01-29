@@ -1,0 +1,182 @@
+---
+title: "hotel_pricing_summary_report"
+author: "tavva_prudhvith"
+date: "January 29, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.INTRODUCTION
+
+## When was the First time you went to a Hotel..??
+
+Here we talk about the most common economies in india "Hotel Proicing In Indian Market".We all keep going to tours and Some tourist places with our family and indeed we rest in some hotel.Now,we will be discussing about the Pricing System Of Hotels.But before we tackle the specifics of segment-based pricing, we need to establish a foundation for the pricing structure,which over time will reveal how high or low a property can go in those segment prices.With this in mind, segment-specific pricing can now be implemented for defined segments with corresponding rate plans. These can include ;Best available rate,a negotiated rate and tour operator rate.
+
+## 2.OVERVIEW OF THE STUDY
+
+Our field stusy concerns about the hotel pricing in the indian market system.We already knew about the hotels and thir pricing with respect to some factors.Now,how hotels depend upon the price strategy is given  by (http://blog.snapshot.travel/how-hotels-can-determine-the-right-pri(cing-strategy).
+
+## AN EMPIRICAL STUDY OF HOTEL ROOM PRICING IN THE INDIAN MARKET.
+
+## 3.1OVERVIEW
+
+The purpose of this project is to analyse the pricing strategy of hotels in the Indian hotel industry.
+Many factors drive hotel room prices. The objective of this project is to identify the factors that matter the most. Think about the following problem:
+Room Rent  = FUNCTION ( Date(s); Hotel Features; External Factors)
+Now,from the regression models we can show the factors dependent upon the Room rent.
+
+## 3.2 DATA
+
+In this case study we are going to compare the hotel pricing in indian market system with the dataset avalilabe from (https://in.hotels.com/) October 2016.Here,we have 42 cities in the above dataset with 13232 Rows and 19 columns.Notice that the dataset tracks hotel prices on 8 different dates at different hotels across different cities.
+
+RoomRent(Dependent Variable) ->  Rent for the cheapest room, double occupancy, in Indian Rupees. Some hotels have more than one type of double occupancy room. For simplicity, we picked the cheapest room with double occupancy.
+
+EXternal Factors: Many external factors can potentially influence the RoomRent. The dataset captures some of these external factors, as explained below.
+
+Date,IsWeekend,IsNewYearEve,CityName,Population,CityRank,IsMetroCity,IsTouristDestination.
+
+Internal Factors: Many Hotel Features can influence the RoomRent. The dataset captures some of these internal factors, as explained below.
+
+HotelName,StarRating,Airport,HotelAddress,HotelPincode,HotelDescription,FreeWifi,FreeBreakfast,HoteCapacity,HasSwimmingPool.
+
+## DESCRIPTIVE STATISTICS 
+```{r }
+hotel<-read.csv(file.choose(),header=T)
+summary(hotel)
+library(psych)
+describe(hotel)
+```
+
+## 3.3 MODEL
+
+In order to test the regression models, we proposed the following model:
+
+```{r }
+reg2<-lm(RoomRent ~ IsTouristDestination + IsNewYearEve + IsMetroCity + HasSwimmingPool,data=hotel)
+summary(reg2)
+
+reg2$coefficients
+```
+
+## RESULTS 
+
+As Y=F(x) 
+y=Room Rent
+x1,x2,x3,... are exploratory variables dependnt upon the room rent i.e the factors.
+Room rent =b0 +b1 *ISTouristDestination+ b2*IsNewYearEve +b3*IsMetroCity  +b4*hasswimmingpool
+From the fitted coefficients,then 
+b0=-1 (let us assume)
+b1=2018,5542
+b2=855.2761
+b3=-1557.1643
+b4=4722.5653
+The Conclusion will be 
+Room rent =b0 +2018.5542 *ISTouristDestination+ 855.2761*IsNewYearEve +(-1557.1643)*IsMetroCity  +4722.5653*hasswimmingpool
+
+## CONCLUSION 
+
+This paper was motivated by the need for research that could improve our understanding of how HOTEL PRICING IN INDIAN MARKET influences the pricing strategies in the hotel industry. The unique contribution of this paper is that we investigated the price strategies by hotel management anf the factors that the people come to the hotels. Now,the factors that the room rent depends is "IstouristDetination","Inewyeareve","IS metrocity","Swimmingpool"
+
+## APPENDIX 1
+
+
+
+## AVERAGE ROOM RENT CORRESPONDING TO DIFERENT FACTORS.
+```{r }
+aggregate(hotel$RoomRent, by=list(freewifi = hotel$FreeWifi, freeBreakfast = hotel$FreeBreakfast, swimmingPool = hotel$HasSwimmingPool,Touristplace=hotel$IsTouristDestination), mean)
+```
+
+## TWO-WAY CONTINGENCY TABLES
+
+```{r }
+table6<-xtabs(~hotel$StarRating + hotel$IsMetroCity)
+table6
+table7<-xtabs(~hotel$StarRating + hotel$IsTouristDestination)
+table7
+```
+
+
+## BOXPLOTS
+
+```{r }
+#Boxplot for Room rent and Weekends.
+boxplot(hotel$RoomRent ~ hotel$IsWeekend,
+        horizontal=T,
+        main="Room rent Vs IS weekend",
+        xlab="Room Rents",
+        ylab="Is Weekend",
+col=c("pink","yellow"))
+
+#Boxplots For Capacity and rating OF th Hotels.
+boxplot(hotel$HotelCapacity ~ hotel$StarRating,
+        horizontal=T,
+        main="Hotel Capacity vs Star rating",
+        xlab="Capacities",
+        ylab="Ratings")
+```
+
+
+## HISTOGRAMS
+
+```{r }
+# Histograms for Distance Between Hotel to Airport.
+hist(hotel$Airport,
+     main="Histogram For  Distance From Hotel to Airport",
+     xlab="Airport Distance in Km")
+
+# Using Histogram command using lattice package to find the distributions of Date variable.
+table(hotel$Date)
+library(lattice)
+histogram(~Date,data=hotel,
+          main="Distribution Of Dates",
+          xlab="Dates",
+          col="yellow")
+```
+
+
+## ORRGRAMS FOR THE DATA 
+```{r corrgram }
+library(corrgram)
+corrgram(hotel,main="Corrgram for the Attributes(columns)",
+         lower.panel = panel.shade,
+         upper.panel=panel.pie,
+         order=T,
+         text.panel = panel.txt)
+```
+
+
+## T- TESTS FOR THE GIVEN DATA TO FIND THE FACTORS FOR THE ROOM RENT
+
+```{r}
+t.test(hotel$RoomRent,hotel$IsTouristDestination)
+t.test(RoomRent~IsNewYearEve,data=hotel)
+t.test(RoomRent~HasSwimmingPool,data=hotel)
+t.test(RoomRent~IsMetroCity,data=hotel)
+```
+
+CONCLUSION: THE ROOM RENT DEPENDS UPON THE FOLLOWING FACTORS:-
+
+1.TOURIST DESTINATION
+2.NEWYEAREVE
+3.SWIMMINGPOOL
+4.METRO CITY
+
+We know that people are always addicted to the gadgets and phones these days.So,mainly the people whpo come from the states prefer the hotels that are not far away from thr airport as it will be easier for them to go to the airport without any delay.
+
+Asmetro cities will have number of graduates and families they prefer to stay in the hotels that are 3 star and 5 star rating .
+
+These days  having swimming pool ,free wifi and breakfast can also be the main factor for the room rent as these factors mainly dependent on room rent.
+
+
+
+
+
+
+
+
+

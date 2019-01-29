@@ -1,0 +1,312 @@
+---
+title: "Hotel_pricing In Indian Market"
+author: "tavva_prudhvith"
+date: "January 26, 2018"
+output:
+  word_document: default
+  html_document: default
+email: prudhvithtavva@gmail.com
+COLLEGE: NIIT University
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The purpose of this project is to analyse the pricing strategy of hotels in the Indian hotel industry.
+Many factors drive hotel room prices. The objective of this project is to identify the factors that matter the most. Think about the following problem:
+Room Rent  = FUNCTION ( Date(s); Hotel Features; External Factors)
+
+
+##Sumarize the data.
+```{r hotel_pricing dataset}
+hotel<-read.csv(file.choose(),header=T)
+summary(hotel)
+library(psych)
+describe(hotel)
+#Apply Some Functions
+aggregate(hotel$RoomRent, by=list(freewifi = hotel$FreeWifi, freeBreakfast = hotel$FreeBreakfast, swimmingPool = hotel$HasSwimmingPool,Touristplace=hotel$IsTouristDestination), mean)
+
+dim(hotel)
+```
+
+##One-Way Contingency Tables for categorial variables
+```{r 1-way}
+table1<-with(hotel,table(FreeWifi))
+table1
+prop.table(table1)*100 # Percentage For Free-Wifi
+table2<-with(hotel,table(HasSwimmingPool))
+table2
+prop.table(table2)*100 #Percentage for Hotels which have swimming pools.
+table3<-with(hotel,table(FreeBreakfast))
+table3
+prop.table(table3)*100 # Percentage For Free Breakfast
+table4<-with(hotel,table(IsTouristDestination))
+table4
+prop.table(table4)*100 # Percentage For Hotels which is a Tourist Destination.
+```
+
+# Two-Way Contingency tables for categorial variables.  
+```{r 2-way}
+table5<-xtabs(~hotel$IsTouristDestination + hotel$IsWeekend)
+table5
+table6<-xtabs(~hotel$StarRating + hotel$IsMetroCity)
+table6
+table7<-xtabs(~hotel$StarRating + hotel$IsTouristDestination)
+table7
+```
+
+## Boxplots For the variables present in 
+```{r boxplots}
+# Boxplot For Capacity.
+boxplot(hotel$HotelCapacity,
+    main="Boxplots for Hotel Capacity",
+    col="blue",
+    horizontal = T,
+    xlab="Capacities")
+
+#Boxplot for Room rent and Weekends.
+boxplot(hotel$RoomRent ~ hotel$IsWeekend,
+        horizontal=T,
+        main="Room rent Vs IS weekend",
+        xlab="Room Rents",
+        ylab="Is Weekend",
+col=c("pink","yellow"))
+
+#Boxplots For Capacity and rating OF th Hotels.
+boxplot(hotel$HotelCapacity ~ hotel$StarRating,
+        horizontal=T,
+        main="Hotel Capacity vs Star rating",
+        xlab="Capacities",
+        ylab="Ratings")
+
+#boxplots FOr Hotel Capacity and Date.
+boxplot(hotel$HotelCapacity~hotel$Date,
+        main="Hotel Capacity vs. Date",
+        ylab="Different Dates", 
+        xlab="Room Rent rupees ",
+        col=c("red","blue","green","yellow"),
+        horizontal=TRUE)
+```
+
+## Histograms Of Suitable Data
+```{r histograms}
+# Histogram Of ratings For Hotels
+hist(hotel$StarRating,
+     main="Histogram Of Rating Of hotels",
+     xlab="Ratings",
+     breaks=10)
+
+# Histograms for Distance Between Hotel to Airport.
+hist(hotel$Airport,
+     main="Histogram For  Distance From Hotel to Airport",
+     xlab="Airport Distance in Km")
+
+# Using Histogram command using lattice package to find the distributions of Date variable.
+table(hotel$Date)
+library(lattice)
+histogram(~Date,data=hotel,
+          main="Distribution Of Dates",
+          xlab="Dates",
+          col="yellow")
+
+# Using Histogram command using lattice package to find the distributions of population variable.
+histogram(~Population,
+          data=hotel,
+          main="Histogram For Distribution Of Populations",
+          col="pink")
+          
+```
+
+
+```{r  plots and barplots}
+plot(hotel$RoomRent,
+     hotel$Population,
+     main="Rent VS Polulation",
+     xlab="Rent",
+     ylab="Population")
+
+# Including the ones which have free wifi in hotels.
+freewifi<-table(hotel$FreeWifi)
+barplot(freewifi,
+        main="barplot of having free wifi in the Hotel.")
+
+#Including the ones which have free breakfast in the hotels.
+breakfast<-table(hotel$FreeBreakfast)
+barplot(breakfast,
+        main="Boxplot Of having free breakfast in the hotel")
+
+#Including the ones which have swimming pool in the hotels.
+pool<-table(hotel$HasSwimmingPool)
+barplot(pool,
+        main="Boxplot Of having swimming Pool in the hotel")
+
+```
+
+Conclusion For the Above Plots and Barplots:
+1.freewifi-According to the graph,there are more hotels having free wifi than the ones who doesn't have wifi.
+2.breakfast-According to the graph,there are more hotels who give free breakfast than the ones who doesn't give breakfast.
+3.pool-According to the graph,there are less number of hotels who have a swimming pool in their hotel.
+
+```{r corrgram }
+library(corrgram)
+corrgram(hotel,main="Corrgram for the Attributes(columns)",
+         lower.panel = panel.shade,
+         upper.panel=panel.pie,
+         order=T,
+         text.panel = panel.txt)
+
+#Let us find the Correlation Matrix For Rent,Pincode,airport and rating.
+
+x<-hotel[,c("RoomRent","StarRating","Airport","FreeWifi")]
+    
+y<-hotel[,c("RoomRent","StarRating","Airport","FreeWifi")]
+    cor(x,y)
+    cov(x,y)
+    var(x,y)
+```
+    
+    
+## Effect Of Star-Rating On Room rent.    
+```{r }
+library(car)
+scatterplot(hotel$StarRating,hotel$RoomRent)
+```
+
+
+##Now,let us visualize the above correlation matrix with corrgram.
+```{r}
+library(corrgram)
+    corrgram(hotel[,c("RoomRent","StarRating","Airport","FreeWifi")],
+             order=T,
+             lower.panel=panel.shade,
+             upper.panel=panel.pie,
+             text.panel=panel.txt)
+```
+
+Test1:-
+Hypothesis:There is no significant difference between the Room Rent of Hotels providing free wifi and those which do not
+```{r tests}
+
+t.test(hotel$RoomRent ~ hotel$FreeWifi)
+```
+Result:As p-value is greater than 0.05 it suggests that there is no significant difference between the means of our Room rent and Free -Wifi.So,we could not reject null hypothesis.
+
+Test2:-
+Hypothesis:average Room rent hotels coming from tourist is more than people coming from cities.
+```{r }
+t.test(hotel$RoomRent,hotel$IsTouristDestination)
+```
+Result:As p-value is 2.2e-16 which is less than 0.05 suggests a significant difference between Room rent and Istouristdestination.So,We can reject Null Hypothesis.
+
+Test3:-
+Hypothesis:Average Room rent hotels having free breakfast is more than the hotels which doen't have any breakfast.
+```{r}
+t.test(hotel$RoomRent~hotel$FreeBreakfast)
+```
+Result:As p-value is greater than 0.05 it suggests that there is no significant difference between the means of our Room rent and free brerakfast.So,we could not reject null hypothesis.
+
+Test4:-
+Hypothesis:The Room Rents of Hotels on normal Eve are cheaper than that on New Year's Eve.
+```{r }
+t.test(RoomRent~IsNewYearEve,data=hotel)
+```
+result: As p-value is <0.05 ,it suggests that there is a significance differenc ebetween room rent hotels on normal eve and newyear eve.
+
+Test5:-
+Hypothesis:Room rent of hotels in non-metro cities are more expensive than hotels in metro cities.
+```{r }
+t.test(RoomRent~IsMetroCity,data=hotel)
+```
+result: As p-value is <0.05 ,it suggests that there is a significance differenc ebetween room rent hotels in metro cities and non-metro cities.
+
+Test6:-
+Hypothesis:Room rent of hotels having swimming pools are more expensive than hotels not having it.
+```{r }
+t.test(RoomRent~HasSwimmingPool,data=hotel)
+```
+Result:As p-value is <0.05 ,it suggests that there is a significance differenc ebetween room rent hotels having swimming pool and hotels that doesn't have swimming pool.
+
+## Regression Models
+
+## Regression Analysis(1)
+```{r }
+reg3<-lm(RoomRent~ StarRating +IsMetroCity +FreeBreakfast,data=hotel)
+summary(reg3)
+
+reg3$coefficients
+```
+As Y=F(x) 
+y=Room Rent
+x1,x2,x3,... are exploratory variables dependnt upon the room rent i.e the factors.
+Room rent =b0 +b1 *Starrating + b2*ismetrocity +b3*freebreakfast
+From the fitted coefficients,then 
+b0=-1 (let us assume)
+b1=3656.730
+b2=-1568.661
+b3=113.012
+The Conclusion will be 
+Room rent =(-1) +3517.46 *Starrating + (-1568.661)*ismetrocity +113.012*freebrreakfast
+
+
+# Regression Analysis (2) 
+```{r }
+reg1<-lm(RoomRent~StarRating + Airport + HasSwimmingPool + HotelCapacity + FreeWifi,data=hotel)
+summary(reg1)
+
+reg1$coefficients
+```
+
+As Y=F(x) 
+y=Room Rent
+x1,x2,x3,... are exploratory variables dependnt upon the room rent i.e the factors.
+Room rent =b0 +b1 *Starrating + b2*airport +b3*hasswimmingpool +b4*hotelcapacity
+From the fitted coefficients,then 
+b0=-1 (let us assume)
+b1=3517.45652 
+b2=25.59515 
+b3=2716.24231
+b4=-14.75071
+The Conclusion will be 
+Room rent =(-1) +3517.46 *Starrating + 25.6*airport +2716.24*hasswimmingpool +(-14.75)*hotelcapacity
+
+
+## Regression Analysis (3)
+```{r }
+reg2<-lm(RoomRent ~ StarRating + Airport + HotelCapacity + IsWeekend + HasSwimmingPool,data=hotel)
+summary(reg2)
+
+reg2$coefficients
+```
+
+As Y=F(x) 
+y=Room Rent
+x1,x2,x3,... are exploratory variables dependnt upon the room rent i.e the factors.
+Room rent =b0 +b1 *Starrating + b2*airport +b3*hotelcapacity +b4*isweekend +b5*hasswimmingpool
+From the fitted coefficients,then 
+b0=-1 (let us assume)
+b1=3522.88515
+b2=25.34555
+b3=-14.77651
+b4=40.17697
+b5=2708.40430
+The Conclusion will be 
+Room rent =(-1) +3522.89 *Starrating + 25.34*airport + (-14.8)*hotelcapacity + 40.17*isweekend + 2708.4*hasswimmingpool.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
